@@ -5,33 +5,51 @@ using UnityEngine;
 
 public class BulletController : MonoBehaviour
 {
-    [SerializeField] GameObject bulletDecal;
 
+    // Reference to the bullet decal prefab
+    [SerializeField] private GameObject bulletDecal;
+
+    // Speed of the bullet
     private float speed = 50f;
+
+    // Time after which the bullet will be destroyed automatically
     private float timeToDestroy = 3f;
 
+    // Target position for the bullet
     public Vector3 target {  get; set; }
+
+    // Flag to check if the bullet has hit a target
     public bool hit {  get; set; }
 
     private void OnEnable()
     {
+        // Schedule destruction of the bullet after a certain time
         Destroy(gameObject, timeToDestroy);
     }
 
     // Update is called once per frame
-    void Update()
+    private void Update()
     {
+        // Move the bullet towards the target position
         transform.position = Vector3.MoveTowards(transform.position, target, speed * Time.deltaTime);
-        if(!hit && Vector3.Distance(transform.position, target) < .01 )
+
+        // Check if the bullet is very close to the target and hasn't hit yet
+        if (!hit && Vector3.Distance(transform.position, target) < 0.01f)
         {
             Destroy(gameObject);
         }
     }
 
-    private void OnCollisionEnter(Collision other)
+    // Called when the bullet collides with another object
+    private void OnCollisionEnter(Collision collision)
     {
-        ContactPoint contact = other.GetContact(0);
-        GameObject.Instantiate(bulletDecal, contact.point + contact.normal * .0001f ,Quaternion.LookRotation(contact.normal));
+        // Get the point of contact from the collision
+        ContactPoint contact = collision.GetContact(0);
+
+        // Instantiate a bullet decal at the point of contact with a slight offset to avoid z-fighting
+        Instantiate(bulletDecal, contact.point + contact.normal * 0.0001f, Quaternion.LookRotation(contact.normal));
+
+        // Destroy the bullet on collision
         Destroy(gameObject);
     }
 }
